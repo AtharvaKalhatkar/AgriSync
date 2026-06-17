@@ -2,7 +2,7 @@ import { useDashboardStats } from '../db/queries';
 import { formatCurrency } from '../lib/utils';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Link } from 'react-router-dom';
-import { FilePlus2, Users, Pill, Receipt, Settings, IndianRupee, TrendingUp, AlertCircle, Coins, ArrowUpRight } from 'lucide-react';
+import { TrendingUp, AlertCircle, Coins, ArrowUpRight } from 'lucide-react';
 
 export default function Dashboard() {
   const stats = useDashboardStats();

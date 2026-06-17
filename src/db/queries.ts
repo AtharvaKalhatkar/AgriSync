@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './db';
-import { startOfDay, startOfWeek, startOfMonth, startOfYear, endOfDay, isWithinInterval } from 'date-fns';
+import { startOfDay, endOfDay } from 'date-fns';
 
 export function useDashboardStats() {
   return useLiveQuery(async () => {

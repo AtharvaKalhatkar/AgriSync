@@ -136,13 +136,13 @@ export default function NewPurchase() {
       item_total: item.quantity * item.rate,
     }));
 
-    await db.transaction('rw', db.purchases, db.purchaseItems, db.suppliers, db.syncQueue, db.medicines, async () => {
+    await db.transaction('rw', [db.purchases, db.purchaseItems, db.suppliers, db.syncQueue, db.medicines], async () => {
       await db.purchases.add(newPurchase);
       await db.purchaseItems.bulkAdd(newPurchaseItems);
       
-      const qItems = [
-        { tableName: 'purchases', recordId: newPurchase.id, operation: 'insert' as const, payload: newPurchase },
-        ...newPurchaseItems.map(item => ({ tableName: 'purchase_items', recordId: item.id, operation: 'insert' as const, payload: item }))
+      const qItems: any[] = [
+        { tableName: 'purchases', recordId: newPurchase.id, operation: 'insert', payload: newPurchase },
+        ...newPurchaseItems.map(item => ({ tableName: 'purchase_items', recordId: item.id, operation: 'insert', payload: item }))
       ];
       
       // Add stock qty & potentially update average purchase price
@@ -153,7 +153,7 @@ export default function NewPurchase() {
         qItems.push({ 
           tableName: 'medicines', 
           recordId: item.medicine.id, 
-          operation: 'update' as const, 
+          operation: 'update', 
           payload: { ...item.medicine, stock_qty: newQty, purchase_price: item.rate, updated_at: now } 
         });
       }
@@ -161,7 +161,7 @@ export default function NewPurchase() {
       if (dueAmount > 0) {
         const newBalance = selectedSupplier.balance_due + dueAmount;
         await db.suppliers.update(selectedSupplier.id, { balance_due: newBalance, updated_at: now });
-        qItems.push({ tableName: 'suppliers', recordId: selectedSupplier.id, operation: 'update' as const, payload: { ...selectedSupplier, balance_due: newBalance, updated_at: now } });
+        qItems.push({ tableName: 'suppliers', recordId: selectedSupplier.id, operation: 'update', payload: { ...selectedSupplier, balance_due: newBalance, updated_at: now } });
       }
 
       await queueSyncItems(qItems);

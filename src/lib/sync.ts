@@ -8,7 +8,7 @@ export async function processSyncQueue() {
   // 1. PUSH PHASE
   // Read oldest unsynced queue items
   const unsyncedItems = await db.syncQueue
-    .where('synced').equals(false)
+    .where('synced').equals(false as any)
     .sortBy('created_at');
 
   for (const item of unsyncedItems) {
@@ -42,7 +42,7 @@ export async function processSyncQueue() {
   oneDayAgo.setHours(oneDayAgo.getHours() - 24);
   
   await db.syncQueue
-    .where('synced').equals(true)
+    .where('synced').equals(true as any)
     .filter(item => new Date(item.created_at) < oneDayAgo)
     .delete();
 

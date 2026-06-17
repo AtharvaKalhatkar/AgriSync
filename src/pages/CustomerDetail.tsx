@@ -69,13 +69,14 @@ export default function CustomerDetail() {
     const newBalance = customer.udhari_balance - amount;
 
     // Distribute payment across unpaid bills (oldest first)
-    const unpaidBills = await db.bills
+    const unpaidBillsRaw = await db.bills
       .where('customer_id').equals(id)
       .filter(b => b.payment_status !== 'paid')
-      .sortBy('bill_date');
+      .toArray();
+    const unpaidBills = unpaidBillsRaw.sort((a, b) => new Date(a.bill_date).getTime() - new Date(b.bill_date).getTime());
 
     let remainingToDistribute = amount;
-    const billsToUpdate = [];
+    const billsToUpdate: any[] = [];
 
     for (const bill of unpaidBills) {
       if (remainingToDistribute <= 0) break;
@@ -95,10 +96,10 @@ export default function CustomerDetail() {
       await db.customers.update(id, { udhari_balance: newBalance, updated_at: new Date().toISOString() });
       await db.bills.bulkPut(billsToUpdate);
       
-      const qItems = [
-        { tableName: 'payments', recordId: payment.id, operation: 'insert' as const, payload: payment },
-        { tableName: 'customers', recordId: id, operation: 'update' as const, payload: { ...customer, udhari_balance: newBalance, updated_at: new Date().toISOString() } },
-        ...billsToUpdate.map(b => ({ tableName: 'bills', recordId: b.id, operation: 'update' as const, payload: b }))
+      const qItems: any[] = [
+        { tableName: 'payments', recordId: payment.id, operation: 'insert', payload: payment },
+        { tableName: 'customers', recordId: id, operation: 'update', payload: { ...customer, udhari_balance: newBalance, updated_at: new Date().toISOString() } },
+        ...billsToUpdate.map(b => ({ tableName: 'bills', recordId: b.id, operation: 'update', payload: b }))
       ];
       
       await queueSyncItems(qItems);

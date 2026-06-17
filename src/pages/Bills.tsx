@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
 import { formatCurrency, cn } from '../lib/utils';
-import { Receipt, Search, Filter, X } from 'lucide-react';
-import { startOfDay, startOfWeek, startOfMonth, startOfYear, endOfDay, isWithinInterval } from 'date-fns';
+import { Receipt, Search, X } from 'lucide-react';
+import { startOfDay, startOfWeek, startOfMonth, startOfYear } from 'date-fns';
 
 type DateFilter = 'all' | 'today' | 'week' | 'month' | 'year';
 type StatusFilter = 'all' | 'paid' | 'unpaid' | 'partial';

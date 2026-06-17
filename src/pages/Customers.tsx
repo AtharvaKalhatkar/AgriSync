@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
 import { formatCurrency, cn } from '../lib/utils';
-import { Users, Search, Plus } from 'lucide-react';
+import { Users, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Customers() {

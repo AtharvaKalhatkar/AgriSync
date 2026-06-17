@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../db/db';
 import { v4 as uuidv4 } from 'uuid';
+import { queueSyncItems } from '../lib/sync';
 
 export default function ResetDB() {
   const navigate = useNavigate();
@@ -9,13 +10,16 @@ export default function ResetDB() {
   useEffect(() => {
     async function resetAndSeed() {
       // 1. Clear everything
-      await db.transaction('rw', db.customers, db.suppliers, db.bills, db.billItems, db.payments, db.syncQueue, db.medicines, async () => {
+      await db.transaction('rw', [db.customers, db.suppliers, db.bills, db.billItems, db.payments, db.syncQueue, db.medicines], async () => {
         await db.customers.clear();
         await db.suppliers.clear();
         await db.bills.clear();
         await db.billItems.clear();
         await db.payments.clear();
         await db.syncQueue.clear();
+        await queueSyncItems([
+          { tableName: 'settings', recordId: 'reset', operation: 'update', payload: { action: 'factory_reset', timestamp: new Date().toISOString() } }
+        ]);
         await db.medicines.clear();
 
         // 2. Add Dummy Products

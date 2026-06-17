@@ -166,13 +166,13 @@ export default function NewBill() {
       item_total: item.quantity * item.rate,
     }));
 
-    await db.transaction('rw', db.bills, db.billItems, db.payments, db.syncQueue, db.medicines, db.customers, async () => {
+    await db.transaction('rw', [db.bills, db.billItems, db.payments, db.syncQueue, db.medicines, db.customers], async () => {
       await db.bills.add(newBill);
       await db.billItems.bulkAdd(newBillItems);
       
-      const qItems = [
-        { tableName: 'bills', recordId: newBill.id, operation: 'insert' as const, payload: newBill },
-        ...newBillItems.map(item => ({ tableName: 'bill_items', recordId: item.id, operation: 'insert' as const, payload: item }))
+      const qItems: any[] = [
+        { tableName: 'bills', recordId: newBill.id, operation: 'insert', payload: newBill },
+        ...newBillItems.map(item => ({ tableName: 'bill_items', recordId: item.id, operation: 'insert', payload: item }))
       ];
       
       for (const item of items) {
