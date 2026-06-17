@@ -15,7 +15,7 @@ const ResetDB = React.lazy(() => import('./pages/ResetDB'));
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <React.Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
         <Routes>
           <Route path="/" element={<Layout />}>
