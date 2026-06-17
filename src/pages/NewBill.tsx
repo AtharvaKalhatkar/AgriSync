@@ -12,6 +12,7 @@ interface BillItemDraft {
   medicine: Medicine;
   quantity: number;
   rate: number;
+  gst_percentage?: number;
 }
 
 export default function NewBill() {
@@ -97,7 +98,7 @@ export default function NewBill() {
   };
 
   const addItem = (med: Medicine) => {
-    setItems([...items, { id: uuidv4(), medicine: med, quantity: 1, rate: med.rate }]);
+    setItems([...items, { id: uuidv4(), medicine: med, quantity: 1, rate: med.rate, gst_percentage: med.gst_percentage }]);
     setMedicineSearch('');
   };
 
@@ -162,6 +163,7 @@ export default function NewBill() {
       medicine_name_snapshot: item.medicine.name,
       rate_at_sale: item.rate,
       purchase_price_at_sale: item.medicine.purchase_price || 0,
+      gst_percentage: item.gst_percentage || 0,
       quantity: item.quantity,
       item_total: item.quantity * item.rate,
     }));
@@ -326,7 +328,10 @@ export default function NewBill() {
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
-                        <div className="font-bold text-gray-900 mb-3 pr-6">{item.medicine.name}</div>
+                        <div className="font-bold text-gray-900 mb-2 pr-6">
+                          {item.medicine.name}
+                          {item.gst_percentage ? <span className="ml-2 text-xs font-normal text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">+{item.gst_percentage}% GST</span> : null}
+                        </div>
                         <div className="flex gap-3">
                           <div className="w-1/3">
                             <label className="text-xs text-gray-500 font-medium block mb-1">Qty</label>
@@ -391,8 +396,11 @@ export default function NewBill() {
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <div className="font-bold text-gray-900 text-sm">
-                            {formatCurrency(m.rate)}
+                          <div className="text-right">
+                            <div className="font-bold text-gray-900 text-sm">
+                              {formatCurrency(m.rate)}
+                            </div>
+                            {m.gst_percentage ? <div className="text-[10px] text-gray-500">{m.gst_percentage}% GST</div> : null}
                           </div>
                           <div className="bg-brand-100 text-brand-700 p-1.5 rounded-lg">
                             <Plus className="w-4 h-4" />

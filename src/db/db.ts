@@ -21,6 +21,7 @@ export interface Medicine {
   stock_qty?: number;
   net_weight?: string; // e.g. "500 ml", "1 kg"
   expiry_date?: string; // YYYY-MM-DD
+  gst_percentage?: number; // e.g. 18
   is_active: boolean; // Soft delete
   created_at: string;
   updated_at: string;
@@ -48,6 +49,7 @@ export interface BillItem {
   quantity: number;
   item_total: number;
   purchase_price_at_sale?: number;
+  gst_percentage?: number;
 }
 
 export interface Payment {

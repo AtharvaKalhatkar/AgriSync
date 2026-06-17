@@ -187,7 +187,7 @@ export default function CustomerDetail() {
                   )}>
                     {item.type === 'bill' ? <Receipt className="w-4 h-4" /> : <IndianRupee className="w-4 h-4" />}
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <div className="font-semibold text-gray-900">
                       {item.type === 'bill' ? `Bill ${item.ref}` : `Payment (${item.mode})`}
                     </div>

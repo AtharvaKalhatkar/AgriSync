@@ -29,6 +29,7 @@ export default function Medicines() {
   const [newMedUnit, setNewMedUnit] = useState('litre');
   const [newMedRate, setNewMedRate] = useState('');
   const [newMedCost, setNewMedCost] = useState('');
+  const [gstPercentage, setGstPercentage] = useState('18');
   const [newMedStock, setNewMedStock] = useState('');
   const [newMedWeight, setNewMedWeight] = useState('');
 
@@ -41,6 +42,7 @@ export default function Medicines() {
       unit: newMedUnit,
       rate: Number(newMedRate),
       purchase_price: newMedCost ? Number(newMedCost) : undefined,
+      gst_percentage: Number(gstPercentage) || 0,
       stock_qty: newMedStock ? Number(newMedStock) : undefined,
       net_weight: newMedWeight || undefined,
       is_active: true,
@@ -53,6 +55,7 @@ export default function Medicines() {
     setNewMedName('');
     setNewMedRate('');
     setNewMedCost('');
+    setGstPercentage('18');
     setNewMedStock('');
     setNewMedWeight('');
   };
@@ -138,15 +141,22 @@ export default function Medicines() {
           <div className="flex gap-2">
             <input
               type="number"
+              placeholder="GST %"
+              className="w-1/3 p-3 border rounded-lg"
+              value={gstPercentage}
+              onChange={e => setGstPercentage(e.target.value)}
+            />
+            <input
+              type="number"
               placeholder="Stock Qty"
-              className="w-1/2 p-3 border rounded-lg"
+              className="w-1/3 p-3 border rounded-lg"
               value={newMedStock}
               onChange={e => setNewMedStock(e.target.value)}
             />
             <input
               type="text"
               placeholder="Net Wt (e.g. 500ml)"
-              className="w-1/2 p-3 border rounded-lg"
+              className="w-1/3 p-3 border rounded-lg"
               value={newMedWeight}
               onChange={e => setNewMedWeight(e.target.value)}
             />
@@ -202,8 +212,11 @@ export default function Medicines() {
               )}
             </div>
             <div className="flex items-center gap-4">
-              <div className="font-bold text-lg text-gray-900">
-                {formatCurrency(med.rate)}
+              <div className="text-right">
+                <div className="font-bold text-lg text-gray-900">
+                  {formatCurrency(med.rate)}
+                </div>
+                <div className="text-xs text-gray-500">{(med as any).gst_percentage || 0}% GST</div>
               </div>
               <div className="flex gap-2 border-l pl-4 border-gray-200">
                 <button 
@@ -257,15 +270,22 @@ export default function Medicines() {
             <div className="flex gap-2">
               <input
                 type="number"
+                placeholder="GST %"
+                className="w-1/3 p-3 border rounded-lg"
+                value={(editingMed as any).gst_percentage || '0'}
+                onChange={e => setEditingMed({...editingMed, gst_percentage: Number(e.target.value)})}
+              />
+              <input
+                type="number"
                 placeholder="Stock"
-                className="w-1/2 p-3 border rounded-lg"
+                className="w-1/3 p-3 border rounded-lg"
                 value={editingMed.stock_qty !== undefined ? editingMed.stock_qty : ''}
                 onChange={e => setEditingMed({...editingMed, stock_qty: e.target.value ? Number(e.target.value) : undefined})}
               />
               <input
                 type="text"
-                placeholder="Net Wt (e.g. 500ml)"
-                className="w-1/2 p-3 border rounded-lg"
+                placeholder="Net Wt"
+                className="w-1/3 p-3 border rounded-lg"
                 value={editingMed.net_weight || ''}
                 onChange={e => setEditingMed({...editingMed, net_weight: e.target.value})}
               />

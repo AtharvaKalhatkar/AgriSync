@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FilePlus2, Users, Pill, Receipt, Settings, PackagePlus, Menu as MenuIcon, X } from 'lucide-react';
+import { LayoutDashboard, FilePlus2, Users, Pill, Receipt, Settings, PackagePlus, Menu as MenuIcon, X, Package } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useState, useEffect } from 'react';
 
@@ -13,6 +13,7 @@ const moreItems = [
   { to: '/customers', icon: Users, label: 'Customers & Khata' },
   { to: '/medicines', icon: Pill, label: 'Medicines Inventory' },
   { to: '/bills', icon: Receipt, label: 'Past Bills' },
+  { to: '/purchases', icon: Package, label: 'Past Purchases' },
   { to: '/settings', icon: Settings, label: 'App Settings' },
 ];
 

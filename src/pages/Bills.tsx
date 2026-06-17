@@ -177,7 +177,10 @@ export default function Bills() {
                   <tbody className="divide-y divide-gray-100">
                     {selectedBillItems?.map((item: any) => (
                       <tr key={item.id}>
-                        <td className="px-4 py-3 font-medium text-gray-900">{item.medicine_name_snapshot}</td>
+                        <td className="px-4 py-3 font-medium text-gray-900">
+                          {item.medicine_name_snapshot}
+                          {item.gst_percentage ? <div className="text-[10px] text-gray-500 font-normal">+{item.gst_percentage}% GST</div> : null}
+                        </td>
                         <td className="px-4 py-3 text-right text-gray-600">{item.quantity}</td>
                         <td className="px-4 py-3 text-right text-gray-600">{formatCurrency(item.rate_at_sale)}</td>
                         <td className="px-4 py-3 text-right font-medium text-gray-900">{formatCurrency(item.item_total)}</td>
