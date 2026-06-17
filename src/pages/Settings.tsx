@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, Save, RefreshCw, Cloud, CloudOff, Download } from 'lucide-react';
+import { Settings as SettingsIcon, Save, RefreshCw, Cloud, CloudOff, Download, Upload } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
 import { processSyncQueue } from '../lib/sync';
@@ -36,30 +36,79 @@ export default function Settings() {
 
   const handleExportData = async () => {
     try {
-      const allCustomers = await db.customers.toArray();
-      const allBills = await db.bills.toArray();
+      const exportData = {
+        customers: await db.customers.toArray(),
+        suppliers: await db.suppliers.toArray(),
+        medicines: await db.medicines.toArray(),
+        bills: await db.bills.toArray(),
+        billItems: await db.billItems.toArray(),
+        payments: await db.payments.toArray(),
+        purchases: await db.purchases.toArray(),
+        purchaseItems: await db.purchaseItems.toArray(),
+      };
       
-      let csvContent = "data:text/csv;charset=utf-8,";
-      csvContent += "Type,ID,Name/Number,Date,Total Amount,Paid Amount,Due Amount,Status\n";
+      const jsonString = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([jsonString], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
       
-      allCustomers.forEach(c => {
-        csvContent += `Customer,${c.id},${c.name.replace(/,/g, '')},${c.created_at},${c.udhari_balance},,,\n`;
-      });
-      
-      allBills.forEach(b => {
-        csvContent += `Bill,${b.bill_number},${b.customer_id},${b.bill_date},${b.total_amount},${b.paid_amount},${b.due_amount},${b.payment_status}\n`;
-      });
-      
-      const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `agrisync_backup_${new Date().toISOString().slice(0, 10)}.csv`);
+      link.href = url;
+      link.download = `agrisync_backup_${new Date().toISOString().slice(0, 10)}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     } catch (e) {
-      alert("Export failed");
+      alert("Backup export failed: " + e);
     }
+  };
+
+  const handleImportData = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!confirm("WARNING: Restoring a backup will overwrite ALL current data in this device. Proceed?")) {
+      e.target.value = ''; // reset input
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const text = event.target?.result as string;
+        const data = JSON.parse(text);
+
+        await db.transaction('rw', [db.customers, db.suppliers, db.bills, db.billItems, db.payments, db.purchases, db.purchaseItems, db.medicines, db.syncQueue], async () => {
+          // Clear existing
+          await db.customers.clear();
+          await db.suppliers.clear();
+          await db.bills.clear();
+          await db.billItems.clear();
+          await db.payments.clear();
+          await db.purchases.clear();
+          await db.purchaseItems.clear();
+          await db.medicines.clear();
+          await db.syncQueue.clear();
+
+          // Restore
+          if (data.customers) await db.customers.bulkAdd(data.customers);
+          if (data.suppliers) await db.suppliers.bulkAdd(data.suppliers);
+          if (data.bills) await db.bills.bulkAdd(data.bills);
+          if (data.billItems) await db.billItems.bulkAdd(data.billItems);
+          if (data.payments) await db.payments.bulkAdd(data.payments);
+          if (data.purchases) await db.purchases.bulkAdd(data.purchases);
+          if (data.purchaseItems) await db.purchaseItems.bulkAdd(data.purchaseItems);
+          if (data.medicines) await db.medicines.bulkAdd(data.medicines);
+        });
+
+        alert("Backup restored successfully!");
+        window.location.reload();
+      } catch (err) {
+        alert("Failed to restore backup. Invalid file format.");
+        console.error(err);
+      }
+    };
+    reader.readAsText(file);
   };
 
   return (
@@ -144,16 +193,29 @@ export default function Settings() {
       </div>
 
       <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
-        <h2 className="text-lg font-bold text-gray-900">Data Backup</h2>
+        <h2 className="text-lg font-bold text-gray-900">Data Backup & Restore</h2>
         <p className="text-sm text-gray-500 mb-4">
-          Export all your customers, bills, and udhari records to a CSV file.
+          Download a complete backup of your shop's database, or restore from a previous backup file.
         </p>
-        <button 
-          onClick={handleExportData}
-          className="bg-white border-2 border-gray-200 text-gray-700 py-3 px-6 rounded-lg font-medium flex items-center gap-2 hover:border-brand-500 transition-colors"
-        >
-          <Download className="w-4 h-4" /> Export to CSV
-        </button>
+        
+        <div className="flex flex-col sm:flex-row gap-4">
+          <button 
+            onClick={handleExportData}
+            className="flex-1 bg-white border-2 border-brand-200 text-brand-700 py-3 px-6 rounded-lg font-bold flex justify-center items-center gap-2 hover:bg-brand-50 transition-colors"
+          >
+            <Download className="w-5 h-5" /> Download Full Backup (JSON)
+          </button>
+          
+          <label className="flex-1 bg-white border-2 border-gray-200 text-gray-700 py-3 px-6 rounded-lg font-bold flex justify-center items-center gap-2 hover:bg-gray-50 transition-colors cursor-pointer relative">
+            <Upload className="w-5 h-5" /> Restore Backup
+            <input 
+              type="file" 
+              accept=".json" 
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              onChange={handleImportData}
+            />
+          </label>
+        </div>
       </div>
 
       <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
